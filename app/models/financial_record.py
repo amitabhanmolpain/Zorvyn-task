@@ -13,7 +13,7 @@ class FinancialRecord(db.Model):
     notes = db.Column(db.String(300))
     is_deleted = db.Column(db.Boolean, default=False)     # soft delete
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f"<Record {self.type} - {self.amount}>"

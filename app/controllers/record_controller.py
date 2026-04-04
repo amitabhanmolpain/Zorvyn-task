@@ -2,8 +2,10 @@ from flask import request, jsonify
 from app.extensions import db
 from app.models.financial_record import FinancialRecord
 from app.models.audit_log import AuditLog
+from app.models.category import Category
 from flask_jwt_extended import get_jwt_identity
 from datetime import datetime
+from sqlalchemy.exc import IntegrityError
 
 def get_all_records():
     query = FinancialRecord.query.filter_by(is_deleted=False)
@@ -73,7 +75,13 @@ def get_record(record_id):
 
 def create_record():
     data = request.get_json()
-    current_user_id = int(get_jwt_identity())
+    if not isinstance(data, dict):
+        return jsonify({"error": "Invalid JSON body"}), 400
+
+    try:
+        current_user_id = int(get_jwt_identity())
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid token identity"}), 401
 
     if not data.get("amount") or not data.get("type") or not data.get("category_id"):
         return jsonify({"error": "Amount, type and category are required"}), 400
@@ -84,13 +92,18 @@ def create_record():
     if data["amount"] <= 0:
         return jsonify({"error": "Amount must be greater than 0"}), 400
 
+    category = Category.query.get(data["category_id"])
+    if not category:
+        return jsonify({"error": "Invalid category_id"}), 400
+
     record = FinancialRecord(
         amount=data["amount"],
         type=data["type"],
         category_id=data["category_id"],
         user_id=current_user_id,
         notes=data.get("notes", ""),
-        date=datetime.strptime(data["date"], "%Y-%m-%d") if data.get("date") else datetime.utcnow()
+        date=datetime.strptime(data["date"], "%Y-%m-%d") if data.get("date") else datetime.utcnow(),
+        updated_at=datetime.utcnow()
     )
 
     db.session.add(record)
@@ -98,7 +111,11 @@ def create_record():
     # Log the action
     log = AuditLog(user_id=current_user_id, action=f"Created record of {data['type']} {data['amount']}")
     db.session.add(log)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({"error": "Invalid record data"}), 400
 
     return jsonify({"message": "Record created successfully", "record_id": record.id}), 201
 
