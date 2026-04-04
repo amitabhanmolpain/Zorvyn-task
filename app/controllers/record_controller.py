@@ -62,7 +62,7 @@ def get_record(record_id):
 
 def create_record():
     data = request.get_json()
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
 
     if not data.get("amount") or not data.get("type") or not data.get("category_id"):
         return jsonify({"error": "Amount, type and category are required"}), 400
@@ -98,7 +98,7 @@ def update_record(record_id):
         return jsonify({"error": "Record not found"}), 404
 
     data = request.get_json()
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
 
     if "amount" in data:
         if data["amount"] <= 0:
@@ -127,7 +127,7 @@ def delete_record(record_id):
     if not record:
         return jsonify({"error": "Record not found"}), 404
 
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
 
     # Soft delete
     record.is_deleted = True

@@ -35,7 +35,7 @@ def update_user(user_id):
         return jsonify({"error": "User not found"}), 404
 
     data = request.get_json()
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
 
     if "name" in data:
         user.name = data["name"]
@@ -59,7 +59,7 @@ def delete_user(user_id):
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
 
     # Log before delete
     log = AuditLog(user_id=current_user_id, action=f"Deleted user {user_id}")

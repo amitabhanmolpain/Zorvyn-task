@@ -45,7 +45,7 @@ def login():
     if not user.is_active:
         return jsonify({"error": "Account is inactive"}), 403
 
-    token = create_access_token(identity=user.id)
+    token = create_access_token(identity=str(user.id))
 
     # Log the action
     log = AuditLog(user_id=user.id, action="User logged in")
@@ -61,7 +61,7 @@ def login():
 
 @jwt_required()
 def me():
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
 
     if not user:

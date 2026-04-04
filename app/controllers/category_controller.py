@@ -17,7 +17,7 @@ def get_all_categories():
 
 def create_category():
     data = request.get_json()
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
 
     if not data or not data.get("name"):
         return jsonify({"error": "Category name is required"}), 400
@@ -41,7 +41,7 @@ def delete_category(category_id):
     if not category:
         return jsonify({"error": "Category not found"}), 404
 
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     category_name = category.name
 
     db.session.delete(category)
