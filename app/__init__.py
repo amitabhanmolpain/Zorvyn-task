@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 import importlib
 
 from .config import Config
@@ -29,6 +29,29 @@ def create_app():
         except ModuleNotFoundError:
             continue
         app.register_blueprint(getattr(module, blueprint_name), url_prefix=url_prefix)
+
+    from .routes.category_routes import category_bp
+    app.register_blueprint(category_bp, url_prefix="/api/categories")
+
+    @app.errorhandler(400)
+    def handle_bad_request(error):
+        return jsonify({"error": "Bad request"}), 400
+
+    @app.errorhandler(401)
+    def handle_unauthorized(error):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    @app.errorhandler(403)
+    def handle_access_denied(error):
+        return jsonify({"error": "Access denied"}), 403
+
+    @app.errorhandler(404)
+    def handle_not_found(error):
+        return jsonify({"error": "Resource not found"}), 404
+
+    @app.errorhandler(500)
+    def handle_internal_server_error(error):
+        return jsonify({"error": "Internal server error"}), 500
 
     
     return app

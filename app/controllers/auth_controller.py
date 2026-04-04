@@ -2,7 +2,7 @@ from flask import request, jsonify
 from app.extensions import db, bcrypt
 from app.models.user import User
 from app.models.audit_log import AuditLog
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 def register():
     data = request.get_json()
@@ -56,4 +56,21 @@ def login():
         "message": "Login successful",
         "token": token,
         "role": user.role
+    }), 200
+
+
+@jwt_required()
+def me():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    return jsonify({
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role,
+        "is_active": user.is_active
     }), 200
