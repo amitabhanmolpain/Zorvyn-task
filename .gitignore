@@ -1,5 +1,3 @@
-venv/
-.env
 __pycache__/
 *.pyc
 *.pyo
@@ -11,6 +9,3 @@ __pycache__/
 htmlcov/
 .cache/
 .ipynb_checkpoints/
-*.db
-instance/
-.flask

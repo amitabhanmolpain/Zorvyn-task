@@ -2,7 +2,7 @@ from flask import Flask, jsonify
 import importlib
 
 from .config import Config
-from .extensions import db, migrate, jwt, bcrypt, ma
+from .extensions import db, migrate, jwt, bcrypt, ma, limiter
 
 def create_app():
     app = Flask(__name__)
@@ -13,6 +13,7 @@ def create_app():
     jwt.init_app(app)
     bcrypt.init_app(app)
     ma.init_app(app)
+    limiter.init_app(app)
 
     from . import models  # noqa: F401
 

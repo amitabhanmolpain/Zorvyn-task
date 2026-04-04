@@ -23,6 +23,17 @@ def get_all_records():
     if end_date:
         query = query.filter(FinancialRecord.date <= datetime.strptime(end_date, "%Y-%m-%d"))
 
+    search = request.args.get("search")
+    if search:
+        query = query.filter(FinancialRecord.notes.ilike(f"%{search}%"))
+
+    min_amount = request.args.get("min_amount", type=float)
+    max_amount = request.args.get("max_amount", type=float)
+    if min_amount is not None:
+        query = query.filter(FinancialRecord.amount >= min_amount)
+    if max_amount is not None:
+        query = query.filter(FinancialRecord.amount <= max_amount)
+
     # Pagination
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 10, type=int)
